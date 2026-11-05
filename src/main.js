@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { interpolateRgbBasis } from 'd3'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 import * as C from './clip-core.js'
@@ -8,22 +9,18 @@ import { STEPS } from './steps.js'
 const $ = id => document.getElementById(id)
 
 // ---------------------------------------------------------------------------------------------
-// Colour map (turbo), read per fragment through a 256 x 1 texture
+// Colour map, read per fragment through a 256 x 1 texture
 // ---------------------------------------------------------------------------------------------
-function turbo(t) {
-  t = Math.min(1, Math.max(0, t))
-  const r = 0.13572138 + t * (4.6153926 + t * (-42.66032258 + t * (132.13108234 + t * (-152.94239396 + t * 59.28637943))))
-  const g = 0.09140261 + t * (2.19418839 + t * (4.84296658 + t * (-14.18503333 + t * (4.27729857 + t * 2.82956604))))
-  const b = 0.1066733 + t * (12.64194608 + t * (-60.58204836 + t * (110.36276771 + t * (-89.90310912 + t * 27.34824973))))
-  return [r, g, b].map(v => Math.min(1, Math.max(0, v)))
-}
+// The app's default heatmap ramp (d3 B-spline basis).
+const ramp = interpolateRgbBasis(['#084F57', '#243038', '#FF5C05', '#FFFF00'])
+const rampRgb = t => ramp(Math.min(1, Math.max(0, t))).match(/\d+/g).slice(0, 3).map(Number)
 const lutData = new Uint8Array(256 * 4)
-for (let i = 0; i < 256; i++) lutData.set([...turbo(i / 255).map(v => v * 255), 255], i * 4)
+for (let i = 0; i < 256; i++) lutData.set([...rampRgb(i / 255), 255], i * 4)
 const lut = new THREE.DataTexture(lutData, 256, 1)
 lut.colorSpace = THREE.SRGBColorSpace
 lut.magFilter = lut.minFilter = THREE.LinearFilter
 lut.needsUpdate = true
-$('colorbar').style.background = `linear-gradient(90deg, ${[0, 0.25, 0.5, 0.75, 1].map(t => `rgb(${turbo(t).map(v => Math.round(v * 255)).join(',')})`).join(',')})`
+$('colorbar').style.background = `linear-gradient(90deg, ${[0, 0.25, 0.5, 0.75, 1].map(t => ramp(t)).join(',')})`
 
 const RANGE = [-1.05, 1.05]
 const uvOf = value => (0.5 + Math.min(1, Math.max(0, (value - RANGE[0]) / (RANGE[1] - RANGE[0]))) * 255) / 256
