@@ -14,9 +14,9 @@ const plane = (center, normal) => ({ shape: 'plane', center, rotation: rot(norma
 const box = (center, size, euler = [0, 0, 0]) => ({ shape: 'box', center, rotation: turn(euler), size })
 const sphere = (center, diameter) => ({ shape: 'sphere', center, rotation: [0, 0, 0, 1], size: [diameter, diameter, diameter] })
 
-const GREEN = '<i class="sw" style="background:#4ade80"></i>'
-const RED = '<i class="sw" style="background:#f87171"></i>'
-const YELLOW = '<i class="sw" style="background:#fde047"></i>'
+const GREEN = '<i class="sw" style="background:#12b76a"></i>'
+const RED = '<i class="sw" style="background:#ef4444"></i>'
+const YELLOW = '<i class="sw" style="background:#c6a53a"></i>'
 
 export const STEPS = [
   {
@@ -28,7 +28,7 @@ a shape, a center, a rotation and a size. All the next steps read this list. Not
 <li>A box or a sphere removes its <b>inside</b>.</li></ul>
 <p>Here nothing is cut yet: the shapes only float over the mesh.</p>`,
     math: 'element = { shape, center, rotation (quaternion), size }',
-    legend: '<i class="sw" style="background:#38bdf8"></i> plane, arrow = kept side &nbsp; <i class="sw" style="background:#fb923c"></i> box',
+    legend: '<i class="sw" style="background:#167c85"></i> plane, arrow = kept side &nbsp; <i class="sw" style="background:#fe5b04"></i> box',
     scene: { model: 'block', elements: [plane([0, 1e-4, 0], [0, 1, 0]), box([0.45, 0.35, 0.35], [0.9, 0.9, 0.9])], surface: 'full', normals: true, camera: [2.6, 1.9, 2.8] },
   },
   {
@@ -132,7 +132,7 @@ a simple linear interpolation.</p>
 <p>One corner alone on its side gives <b>3 points</b> (a triangle). Two and two gives <b>4 points</b> (a quadrilateral), as here.</p>`,
     math: `t = dA / (dA − dB)
 point = pA + t · (pB − pA)`,
-    legend: `${GREEN} corner kept &nbsp; ${RED} corner removed &nbsp; <i class="sw" style="background:#ff9f1c"></i> crossed edge &nbsp; ${YELLOW} crossing point`,
+    legend: `${GREEN} corner kept &nbsp; ${RED} corner removed &nbsp; <i class="sw" style="background:#ff8141"></i> crossed edge &nbsp; ${YELLOW} crossing point`,
     scene: { model: 'block', elements: [plane([0.05, 0.02, 0.03], [0.35, 1, 0.25])], focus: 'distances', camera: [2.3, 1.6, 2.6] },
   },
   {
@@ -145,7 +145,7 @@ their center, measured in two directions lying in the plane.</p>
 a, b = two directions in the plane
 θ = atan2( b · (v − c), a · (v − c) )
 sort by θ, then triangles (0, 2, 1), (0, 3, 2), …`,
-    legend: '<i class="sw" style="background:#67e8f9"></i> sorted polygon &nbsp; coloured: fan triangles',
+    legend: '<i class="sw" style="background:#0b6e77"></i> sorted polygon &nbsp; coloured: fan triangles',
     scene: { model: 'block', elements: [plane([0.05, 0.02, 0.03], [0.35, 1, 0.25])], focus: 'polygon', camera: [2.3, 1.6, 2.6] },
   },
   {
@@ -154,7 +154,7 @@ sort by θ, then triangles (0, 2, 1), (0, 3, 2), …`,
     body: `<p>Every crossed tetrahedron gives its own small polygon. Put together, they are the cap.</p>
 <p>Two neighbours share an edge, and both compute the crossing on that edge from the <b>same two corners</b>,
 so their pieces meet exactly: the cap has no gaps, even on a concave part with a hole like this bracket.</p>`,
-    legend: 'one colour per tetrahedron &nbsp; <i class="sw" style="background:#fff"></i> tetrahedron being added',
+    legend: 'one colour per tetrahedron &nbsp; <i class="sw" style="background:#1c242a"></i> tetrahedron being added',
     scene: {
       model: 'bracket', elements: [plane([0, 0, 0.05], [0.15, 0.1, 1])], surface: 'clipped', cap: 'tet', capWire: true, camera: [0.6, 0.9, 3.2],
       anim: (t, s) => s.setBuild(Math.min(1, (t % 8) / 6)),
@@ -216,7 +216,7 @@ volume, a cap would erase itself.</p>
 <li>A cap triangle with its 3 corners inside another volume is dropped before drawing: a box and a ball are convex, so the whole triangle is inside.</li>
 <li>Two identical volumes share one owner, so their caps do not erase each other.</li></ul>`,
     trick: 'One extra vertex attribute (<code>owner</code>) on the cap, and one <code>continue</code> in the shader loop of step 5.',
-    legend: '<i class="sw" style="background:#f97316"></i> cap owned by the box &nbsp; <i class="sw" style="background:#a855f7"></i> cap owned by the sphere',
+    legend: '<i class="sw" style="background:#fe5b04"></i> cap owned by the box &nbsp; <i class="sw" style="background:#3b82f6"></i> cap owned by the sphere',
     scene: { model: 'block', elements: [box([0.35, 0.3, 0.3], [0.9, 0.9, 0.9]), sphere([-0.25, 0.35, 0.35], 1.0)], surface: 'clipped', cap: 'owner', camera: [2.5, 2.2, 2.5] },
   },
   {
@@ -229,7 +229,7 @@ volume, a cap would erase itself.</p>
 <p>A segment whose middle is removed by another shape is dropped.</p>`,
     math: `circle center = c − (n · (c − a)) n
 circle radius = √(r² − d²)     d = n · (c − a)`,
-    legend: '<i class="sw" style="background:#ff3b3b"></i> outline',
+    legend: '<i class="sw" style="background:#dc2626"></i> outline',
     scene: { model: 'ball', elements: [plane([0, -0.2, 0], [0.1, 1, 0.3]), box([0.5, 0.2, 0.4], [0.8, 0.8, 0.8]), sphere([-0.5, 0.2, 0.35], 0.8)], surface: 'clipped', cap: 'field', outline: true, camera: [2.2, 2.0, 2.6] },
   },
   {

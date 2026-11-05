@@ -4,53 +4,75 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>How the editor cuts a mesh, step by step</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
 <style>
-:root { --bg: #0b1020; --panel: #111830; --panel2: #162042; --line: #26325a; --text: #dbe4ff; --dim: #8e9cc8; --accent: #60a5fa; }
+/* DotBlocks design system tokens (app/globals.css) */
+:root {
+  --neutral-0: #ffffff; --neutral-50: #f6f9f9; --neutral-100: #f1f5f9; --neutral-200: #e2e8f0; --neutral-300: #c7d1d4;
+  --neutral-400: #9eadb3; --neutral-500: #6c7b83; --neutral-600: #4a5a63; --neutral-700: #33424a; --neutral-900: #1c242a;
+  --primary-50: #fff5e9; --primary-500: #fe5b04; --primary-600: #e14f03;
+  --secondary-100: #e6f4f5; --secondary-500: #167c85; --secondary-700: #084f57;
+  --background: var(--neutral-50); --foreground: var(--neutral-900); --card: var(--neutral-0);
+  --muted: var(--neutral-100); --muted-foreground: var(--neutral-500); --border: var(--neutral-200);
+  --primary: var(--primary-500); --secondary: var(--secondary-700); --accent: var(--secondary-100);
+  --font-sans: Figtree, ui-sans-serif, system-ui, sans-serif;
+  --font-heading: Poppins, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --radius-sm: .25rem; --radius-md: .5rem; --radius-lg: 1rem; --radius-full: 9999px;
+  --shadow-xs: 0 10px 15px 0 rgb(158 173 179 / .07); --shadow-sm: 0 8px 16px 0 rgb(51 66 74 / .07);
+}
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+html, body { margin: 0; height: 100%; background: var(--background); color: var(--foreground); font: 16px/1.5 var(--font-sans); }
 body { display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
-header { display: flex; align-items: center; gap: 16px; padding: 10px 18px; border-bottom: 1px solid var(--line); background: var(--panel); }
-header h1 { font-size: 16px; margin: 0; font-weight: 650; white-space: nowrap; }
-#pills { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
-#pills button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel2); color: var(--dim); font: 600 12px ui-sans-serif, system-ui; cursor: pointer; }
-#pills button.done { color: #c7d2fe; }
-#pills button.cur { background: var(--accent); border-color: var(--accent); color: #07101f; }
-main { display: grid; grid-template-columns: minmax(380px, 34%) 1fr; min-height: 0; }
-#card { overflow-y: auto; padding: 22px 26px 18px; border-right: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; }
-#meta { display: flex; justify-content: space-between; align-items: center; color: var(--dim); font-size: 13px; }
-#where { border: 1px solid var(--line); border-radius: 12px; padding: 1px 10px; font-size: 12px; color: #c7d2fe; background: var(--panel2); }
-#title { font-size: 23px; line-height: 1.25; margin: 12px 0 10px; display: flex; gap: 14px; align-items: flex-start; }
-#title .big { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: #07101f; display: grid; place-items: center; font-size: 21px; font-weight: 750; }
-#body p, #body li { color: #cdd7f6; }
+header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--card); }
+header h1 { font: 600 18px/24px var(--font-heading); margin: 0; white-space: nowrap; }
+header h1 b { color: var(--primary); font-weight: 700; }
+#pills { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+#pills button { width: 30px; height: 30px; border-radius: var(--radius-full); border: 1px solid var(--border); background: var(--card); color: var(--muted-foreground); font: 600 12px var(--font-sans); cursor: pointer; transition: background .15s, color .15s; }
+#pills button:hover { border-color: var(--secondary-500); color: var(--secondary-500); }
+#pills button.done { background: var(--accent); color: var(--secondary); border-color: var(--accent); }
+#pills button.cur { background: var(--primary); border-color: var(--primary); color: var(--neutral-0); }
+main { display: grid; grid-template-columns: minmax(380px, 34%) 1fr; min-height: 0; gap: 16px; padding: 16px; }
+#card { overflow-y: auto; padding: 24px 26px 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+#meta { display: flex; justify-content: space-between; align-items: center; color: var(--muted-foreground); font-size: 12px; line-height: 16px; font-weight: 500; }
+#where { border-radius: var(--radius-full); padding: 2px 10px; background: var(--accent); color: var(--secondary); font-weight: 600; }
+#title { font: 600 24px/32px var(--font-heading); margin: 14px 0 12px; display: flex; gap: 14px; align-items: flex-start; }
+#title .big { flex: none; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--primary); color: var(--neutral-0); display: grid; place-items: center; font: 700 18px var(--font-heading); }
+#body { font-size: 16px; line-height: 24px; color: var(--neutral-700); }
+#body b { color: var(--foreground); }
 #body ul, #body ol { padding-left: 20px; }
-code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; background: rgba(255,255,255,.07); padding: 0 4px; border-radius: 3px; }
-.box { margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel2); }
-.box h3 { margin: 0; padding: 6px 12px; font-size: 12px; letter-spacing: .6px; text-transform: uppercase; color: var(--dim); border-bottom: 1px solid var(--line); }
-#math { margin: 0; padding: 10px 12px; font: 13.5px/1.6 ui-monospace, Menlo, monospace; white-space: pre-wrap; color: #e0e7ff; }
-#trick { padding: 4px 12px 8px; font-size: 14px; color: #cdd7f6; }
+code { font: 13px var(--font-mono); background: var(--muted); padding: 1px 5px; border-radius: var(--radius-sm); color: var(--secondary); }
+.box { margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); overflow: hidden; }
+.box h3 { margin: 0; padding: 6px 12px; font: 600 12px/16px var(--font-sans); letter-spacing: .4px; text-transform: uppercase; color: var(--muted-foreground); border-bottom: 1px solid var(--border); background: var(--muted); }
+#math { margin: 0; padding: 10px 12px; font: 13.5px/1.6 var(--font-mono); white-space: pre-wrap; color: var(--neutral-900); }
+#trick { padding: 4px 12px 8px; font-size: 14px; line-height: 20px; color: var(--neutral-700); }
 #trick ul { padding-left: 18px; margin: 6px 0; }
-#trick-box { border-color: #3b4f8a; }
-#trick-box h3 { color: #93c5fd; }
-nav { margin-top: auto; padding-top: 18px; display: flex; gap: 10px; }
-nav button { flex: 1; padding: 10px; font: 600 15px ui-sans-serif, system-ui; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); cursor: pointer; }
-nav button#next { background: var(--accent); border-color: var(--accent); color: #07101f; }
-nav button:disabled { opacity: .35; cursor: default; }
-#view { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+#trick-box { border-color: var(--primary-500); background: var(--primary-50); }
+#trick-box h3 { color: var(--primary-600); background: transparent; border-color: rgb(254 91 4 / .25); }
+nav { margin-top: auto; padding-top: 20px; display: flex; gap: 10px; }
+nav button { flex: 1; height: 40px; font: 600 14px var(--font-sans); border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--card); color: var(--foreground); cursor: pointer; }
+nav button:hover:not(:disabled) { background: var(--muted); }
+nav button#next { background: var(--primary); border-color: var(--primary); color: var(--neutral-0); }
+nav button#next:hover:not(:disabled) { background: var(--primary-600); }
+nav button:disabled { opacity: .4; cursor: default; }
+#view { position: relative; min-width: 0; min-height: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--background); box-shadow: var(--shadow-sm); }
 #view canvas { display: block; width: 100%; height: 100%; }
 #labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.lbl { position: absolute; transform: translate(-50%, -130%); font: 12px ui-monospace, Menlo, monospace; white-space: nowrap; padding: 1px 5px; border-radius: 4px; background: rgba(8, 12, 28, .82); color: #fff; border: 1px solid rgba(255,255,255,.15); }
-.lbl.kept { color: #86efac; } .lbl.removed { color: #fca5a5; } .lbl.on { color: #fde047; } .lbl.poly { color: #67e8f9; }
-#legend, #colorbar-wrap { position: absolute; left: 14px; background: rgba(13, 19, 40, .88); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
+.lbl { position: absolute; transform: translate(-50%, -130%); font: 500 12px var(--font-mono); white-space: nowrap; padding: 1px 6px; border-radius: var(--radius-sm); background: var(--card); color: var(--foreground); border: 1px solid var(--border); box-shadow: var(--shadow-xs); }
+.lbl.kept { color: #067647; } .lbl.removed { color: #dc2626; } .lbl.on { color: #8c6d1f; } .lbl.poly { color: var(--secondary); }
+#legend, #colorbar-wrap { position: absolute; left: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 6px 10px; font-size: 13px; color: var(--neutral-700); box-shadow: var(--shadow-xs); }
 #legend { bottom: 14px; }
-#colorbar-wrap { top: 14px; display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 12px; }
-#colorbar { width: 140px; height: 9px; border-radius: 4px; }
-.sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
-#hint { position: absolute; right: 14px; bottom: 14px; color: var(--dim); font-size: 12px; pointer-events: none; }
+#colorbar-wrap { top: 14px; display: flex; align-items: center; gap: 8px; color: var(--muted-foreground); font-size: 12px; }
+#colorbar { width: 140px; height: 8px; border-radius: var(--radius-full); }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: var(--radius-sm); margin-right: 4px; vertical-align: -1px; }
+#hint { position: absolute; right: 14px; top: 14px; color: var(--muted-foreground); font-size: 12px; pointer-events: none; }
 </style>
 </head>
 <body>
 <header>
-  <h1>How the editor cuts a mesh</h1>
+  <h1><b>DotBlocks</b> · How the editor cuts a mesh</h1>
   <div id="pills"></div>
 </header>
 <main>

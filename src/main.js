@@ -36,13 +36,13 @@ const view = $('view')
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.localClippingEnabled = true
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-renderer.setClearColor(0x0b1020, 1)
+renderer.setClearColor(0xf6f9f9, 1)
 view.prepend(renderer.domElement)
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 100)
 scene.add(camera)
-scene.add(new THREE.HemisphereLight(0xe8eeff, 0x283050, 1.6))
+scene.add(new THREE.HemisphereLight(0xffffff, 0xc7d1d4, 1.8))
 const key = new THREE.DirectionalLight(0xffffff, 1.7)
 key.position.set(1.5, 2, 1)
 camera.add(key)
@@ -73,16 +73,16 @@ const empty = new THREE.BufferGeometry()
 const surface = new THREE.Mesh(empty, MATERIALS.full)
 const cap = new THREE.Mesh(empty, MATERIALS.capField)
 cap.renderOrder = 1
-const capWireMaterial = C.patchClipVolumes(new THREE.LineBasicMaterial({ color: 0x0b1020, transparent: true, opacity: 0.7 }), uniforms, true)
+const capWireMaterial = C.patchClipVolumes(new THREE.LineBasicMaterial({ color: 0x1c242a, transparent: true, opacity: 0.55 }), uniforms, true)
 const capWire = new THREE.LineSegments(empty, capWireMaterial)
 capWire.renderOrder = 10
-const ghost = new THREE.Mesh(empty, new THREE.MeshBasicMaterial({ color: 0x9fb4ff, transparent: true, opacity: 0.06, depthWrite: false, side: THREE.DoubleSide }))
-const ghostEdges = new THREE.LineSegments(empty, overlay(0x9fb4ff, 0.35))
+const ghost = new THREE.Mesh(empty, new THREE.MeshBasicMaterial({ color: 0x9eadb3, transparent: true, opacity: 0.08, depthWrite: false, side: THREE.DoubleSide }))
+const ghostEdges = new THREE.LineSegments(empty, overlay(0x6c7b83, 0.35))
 const nodes = new THREE.Points(empty, new THREE.PointsMaterial({ size: 6, sizeAttenuation: false, vertexColors: true, depthTest: false, transparent: true }))
 nodes.renderOrder = 20
-const cutTets = new THREE.LineSegments(empty, overlay(0xfde047, 0.5))
+const cutTets = new THREE.LineSegments(empty, overlay(0xc6a53a, 0.7))
 cutTets.renderOrder = 15
-const outline = new THREE.LineSegments(empty, new THREE.LineBasicMaterial({ color: 0xff3b3b }))
+const outline = new THREE.LineSegments(empty, new THREE.LineBasicMaterial({ color: 0xdc2626 }))
 outline.renderOrder = 30
 const shapes = new THREE.Group()
 const arrows = new THREE.Group()
@@ -144,7 +144,7 @@ function writeGpu() {
   elements.filter(e => e.shape === 'plane').forEach((e, i) => planes.push(C.writeClippingPlane(e, planePool[i])))
 }
 
-const SHAPE_COLORS = { plane: 0x38bdf8, box: 0xfb923c, sphere: 0xc084fc }
+const SHAPE_COLORS = { plane: 0x167c85, box: 0xfe5b04, sphere: 0x3b82f6 }
 function refreshShapes() {
   shapes.clear()
   for (const element of elements) {
@@ -209,8 +209,8 @@ function refreshNodes() {
     let hex
     if (single) {
       const d = single.distanceToPoint(p)
-      hex = d > C.SECTION_EPS ? 0x4ade80 : d < -C.SECTION_EPS ? 0xf87171 : 0xfde047
-    } else hex = elements.some(e => C.clippingElementRemoves(e, p)) ? 0xf87171 : 0x4ade80
+      hex = d > C.SECTION_EPS ? 0x12b76a : d < -C.SECTION_EPS ? 0xef4444 : 0xc6a53a
+    } else hex = elements.some(e => C.clippingElementRemoves(e, p)) ? 0xef4444 : 0x12b76a
     tmp.set(hex)
     colors.setXYZ(i, tmp.r, tmp.g, tmp.b)
   }
@@ -257,8 +257,8 @@ function refreshOutline() {
 // ---------------------------------------------------------------------------------------------
 // The cap: the app's recipe and builders
 // ---------------------------------------------------------------------------------------------
-const OWNER_COLORS = [0xf97316, 0xa855f7, 0x22c55e, 0xeab308]
-const SECTION_COLORS = [0x60a5fa, 0xf472b6, 0x34d399, 0xfbbf24, 0xa78bfa, 0xf87171]
+const OWNER_COLORS = [0xfe5b04, 0x3b82f6, 0x12b76a, 0xc6a53a]
+const SECTION_COLORS = [0xfe5b04, 0x167c85, 0x3b82f6, 0xc6a53a, 0x084f57, 0xff8141]
 
 function buildCap() {
   const mode = step.scene.cap
@@ -278,7 +278,7 @@ function buildCap() {
       const v = parts.indices[f * 3 + k]
       if (mode === 'tet') tmp.setHSL((parts.vertexTets[v] * 0.6180339) % 1, 0.55, 0.55)
       else if (mode === 'section') tmp.set(SECTION_COLORS[parts.faceSections[f] % SECTION_COLORS.length])
-      else if (mode === 'owner') tmp.set(parts.vertexOwners[v] < 0 ? 0x38bdf8 : OWNER_COLORS[parts.vertexOwners[v] % OWNER_COLORS.length])
+      else if (mode === 'owner') tmp.set(parts.vertexOwners[v] < 0 ? 0x167c85 : OWNER_COLORS[parts.vertexOwners[v] % OWNER_COLORS.length])
       colors.set([tmp.r, tmp.g, tmp.b], v * 3)
     }
   }
@@ -329,7 +329,7 @@ function setBuild(fraction) {
   scan.clear()
   if (fraction < 1 && shown > 0) {
     const tet = capParts.capFaceTetrahedronIndices[shown - 1]
-    const lines = new THREE.LineSegments(tetEdges([tet]), overlay(0xffffff))
+    const lines = new THREE.LineSegments(tetEdges([tet]), overlay(0x1c242a))
     lines.renderOrder = 50
     scan.add(lines)
   }
@@ -376,7 +376,7 @@ function refreshFocus() {
   for (let e = 0; e < 6; e++) {
     const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...trace.corners[C.EDGE_A[e]]), new THREE.Vector3(...trace.corners[C.EDGE_B[e]])])
     const crossed = mode === 'distances' && crossing.has(e)
-    const line = new THREE.Line(g, overlay(crossed ? 0xff9f1c : 0xffffff, mode === 'polygon' ? 0.45 : 0.9))
+    const line = new THREE.Line(g, overlay(crossed ? 0xff8141 : 0x1c242a, mode === 'polygon' ? 0.45 : 0.9))
     line.renderOrder = 55
     focus.add(line)
   }
@@ -384,7 +384,7 @@ function refreshFocus() {
   const n = new THREE.Vector3(section.plane.normal.x, section.plane.normal.y, section.plane.normal.z)
   const c = new THREE.Vector3(...trace.corners.reduce((s, p) => s.map((v, k) => v + p[k] / 4), [0, 0, 0]))
   const onPlane = c.clone().addScaledVector(n, -(n.dot(c) + section.plane.constant))
-  const square = new THREE.Mesh(new THREE.PlaneGeometry(modelScale * 0.13, modelScale * 0.13), new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.12, side: THREE.DoubleSide, depthWrite: false }))
+  const square = new THREE.Mesh(new THREE.PlaneGeometry(modelScale * 0.13, modelScale * 0.13), new THREE.MeshBasicMaterial({ color: 0x167c85, transparent: true, opacity: 0.14, side: THREE.DoubleSide, depthWrite: false }))
   square.position.copy(onPlane)
   square.lookAt(onPlane.clone().add(n))
   focus.add(square)
@@ -393,21 +393,21 @@ function refreshFocus() {
     trace.corners.forEach((p, k) => {
       const d = trace.d[k]
       const cls = d > C.SECTION_EPS ? 'kept' : d < -C.SECTION_EPS ? 'removed' : 'on'
-      focus.add(dot(p, { kept: 0x4ade80, removed: 0xf87171, on: 0xfde047 }[cls], r))
+      focus.add(dot(p, { kept: 0x12b76a, removed: 0xef4444, on: 0xc6a53a }[cls], r))
       addLabel(p, `p${k}  d = ${fmt(d)}`, cls)
     })
     for (const x of trace.crossings) {
-      focus.add(dot(x.point, 0xfde047, r * 1.1))
+      focus.add(dot(x.point, 0xc6a53a, r * 1.1))
       addLabel(x.point, `t = ${x.t.toFixed(2)}`, 'on')
     }
     return
   }
   // polygon: the sorted loop, its centre and the fan, coloured by triangle
   const pts = trace.sorted.map(v => v.p)
-  const loop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([...pts, pts[0]].map(p => new THREE.Vector3(...p))), overlay(0x67e8f9))
+  const loop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([...pts, pts[0]].map(p => new THREE.Vector3(...p))), overlay(0x0b6e77))
   loop.renderOrder = 58
   focus.add(loop)
-  focus.add(dot(trace.centroid, 0xffffff, r * 0.8))
+  focus.add(dot(trace.centroid, 0x1c242a, r * 0.8))
   addLabel(trace.centroid, 'center c', '')
   trace.sorted.forEach((v, i) => addLabel(v.p, `${i}   θ = ${((trace.angles[trace.order[i]] * 180) / Math.PI).toFixed(0)}°`, 'poly'))
   const positions = []
