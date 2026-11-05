@@ -29,7 +29,7 @@ a shape, a center, a rotation and a size. All the next steps read this list. Not
 <p>Here nothing is cut yet: the shapes only float over the mesh.</p>`,
     math: 'element = { shape, center, rotation (quaternion), size }',
     legend: '<i class="sw" style="background:#167c85"></i> plane, arrow = kept side &nbsp; <i class="sw" style="background:#fe5b04"></i> box',
-    scene: { model: 'block', elements: [plane([0, 1e-4, 0], [0, 1, 0]), box([0.45, 0.35, 0.35], [0.9, 0.9, 0.9])], surface: 'full', normals: true, camera: [2.6, 1.9, 2.8] },
+    scene: { model: 'bracket', elements: [plane([0, -0.45, 0], [0, 1, 0]), box([0.6, -0.55, 0.25], [0.6, 0.6, 0.6])], surface: 'full', normals: true, camera: [2.4, 1.9, 3.4] },
   },
   {
     title: 'Is a point removed? The plane test',
@@ -43,7 +43,7 @@ d(x) = n · x + c
 d(x) &lt; 0  ⇒  x is removed`,
     legend: `${GREEN} d &gt; 0 kept &nbsp; ${RED} d &lt; 0 removed &nbsp; ${YELLOW} on the plane`,
     scene: {
-      model: 'block', elements: [plane([0, 0, 0], [0, 1, 0])], ghost: true, nodes: true, normals: true, camera: [2.8, 1.3, 2.6],
+      model: 'bracket', elements: [plane([-0.3, -0.35, 0], [0, 1, 0])], ghost: true, nodes: true, normals: true, camera: [2.8, 1.3, 3.2],
       anim: (t, s) => {
         const a = Math.sin(t * 0.8) * 0.75
         s.update(0, { rotation: rot([Math.sin(a), Math.cos(a), 0.3 * Math.sin(t * 0.5)]) })
@@ -63,7 +63,7 @@ box removes x     ⇔  max(|x′|, |y′|, |z′|) &lt; 1
 sphere removes x  ⇔  ‖x′‖ &lt; 1`,
     legend: `${GREEN} kept &nbsp; ${RED} inside a volume: removed`,
     scene: {
-      model: 'block', elements: [box([0.45, 0.2, 0.2], [0.8, 0.8, 0.8]), sphere([-0.5, 0.2, 0.25], 0.8)], ghost: true, nodes: true, camera: [2.4, 2.4, 2.6],
+      model: 'bracket', elements: [box([0.35, -0.6, 0.15], [0.6, 0.6, 0.6]), sphere([-0.8, 0.45, 0.2], 0.7)], ghost: true, nodes: true, camera: [2.4, 1.9, 3.4],
       anim: (t, s) => s.update(0, { rotation: turn([0.25 * Math.sin(t * 0.6), t * 0.4, 0]) }),
     },
   },
@@ -72,12 +72,12 @@ sphere removes x  ⇔  ‖x′‖ &lt; 1`,
     where: 'Maths',
     body: `<p>With several shapes, a point is removed as soon as <b>one</b> shape removes it.
 What stays is the part that <b>every</b> shape keeps.</p>
-<p>Two planes through the center therefore keep a quarter of the block. A plane and a box keep the plane's
+<p>Two planes through the corner of the L therefore keep only the part both keep. A plane and a box keep the plane's
 side, minus the inside of the box.</p>`,
     math: `removed(x) = removed₁(x)  OR  removed₂(x)  OR  …
 kept       = kept₁  ∩  kept₂  ∩  …`,
     legend: `${GREEN} kept by every shape &nbsp; ${RED} removed by at least one`,
-    scene: { model: 'block', elements: [plane([0, 0, 0], [0, 1, 0]), plane([0, 0, 0], [1, 0, 0])], ghost: true, nodes: true, normals: true, camera: [2.4, 2.2, 2.6] },
+    scene: { model: 'bracket', elements: [plane([0, -0.45, 0], [0, 1, 0]), plane([-0.75, 0, 0], [1, 0, 0])], ghost: true, nodes: true, normals: true, camera: [2.4, 1.9, 3.4] },
   },
   {
     title: 'Hide the removed pixels on the graphics card',
@@ -94,8 +94,8 @@ position, the fragment shader loops over the volume matrices and discards.</li>
 <li>All materials share <b>one uniform array</b> of matrices. Moving a box rewrites that array: no shader recompiles.</li>
 <li>The test uses <b>1 + 0.0001</b> instead of 1, so a box face flush with a mesh face is removed cleanly instead of flickering.</li></ul>`,
     scene: {
-      model: 'block', elements: [plane([0, -0.25, 0], [0.1, 1, 0]), box([0.5, 0.45, 0.35], [0.7, 0.7, 0.7])], surface: 'hollow', normals: true, camera: [2.4, 2.3, 2.8],
-      anim: (t, s) => s.update(1, { center: [0.6 * Math.sin(t * 0.7), 0.45, 0.35] }),
+      model: 'bracket', elements: [plane([0, -0.75, 0], [0.05, 1, 0]), box([0, -0.4, 0.3], [0.55, 0.55, 0.55])], surface: 'hollow', normals: true, camera: [2.4, 1.9, 3.4],
+      anim: (t, s) => s.update(1, { center: [0.85 * Math.sin(t * 0.7), -0.4, 0.3] }),
     },
   },
   {
@@ -104,7 +104,7 @@ position, the fragment shader loops over the volume matrices and discards.</li>
     body: `<p>The surface is only a skin of triangles; the inside is empty. Once pixels are hidden, you look
 <b>into the skin</b>: you see the far inner walls, not the material at the cut.</p>
 <p>A real face must close the cut. This face is the <b>cap</b>. Steps 7 to 15 build it.</p>`,
-    scene: { model: 'ring', elements: [plane([0, 0.05, 0], [0.25, 1, 0.1])], surface: 'hollow', camera: [1.6, 2.2, 2.2] },
+    scene: { model: 'bracket', elements: [plane([0, 0, 0.05], [-0.15, -0.1, -1])], surface: 'hollow', camera: [1.9, 1.3, 2.9] },
   },
   {
     title: 'Find the tetrahedra the plane crosses',
@@ -119,8 +119,8 @@ crossed ⇔ kept corners is 1, 2 or 3`,
 <li>The tetrahedra are pre-sorted in layers along the plane direction, so a plane dragged along its normal only reads its own layer.</li></ul>`,
     legend: `${YELLOW} tetrahedra crossed by the plane`,
     scene: {
-      model: 'block', elements: [plane([0, 0, 0], [0.3, 1, 0.2])], ghost: true, cutTets: true, normals: true, camera: [2.3, 2.3, 2.5],
-      anim: (t, s) => s.update(0, { center: [0, 0.55 * Math.sin(t * 0.6), 0] }),
+      model: 'bracket', elements: [plane([-0.3, -0.35, 0], [0.3, 1, 0.2])], ghost: true, cutTets: true, normals: true, camera: [2.4, 1.9, 3.4],
+      anim: (t, s) => s.update(0, { center: [-0.3, -0.35 + 0.5 * Math.sin(t * 0.6), 0] }),
     },
   },
   {
@@ -133,7 +133,7 @@ a simple linear interpolation.</p>
     math: `t = dA / (dA − dB)
 point = pA + t · (pB − pA)`,
     legend: `${GREEN} corner kept &nbsp; ${RED} corner removed &nbsp; <i class="sw" style="background:#ff8141"></i> crossed edge &nbsp; ${YELLOW} crossing point`,
-    scene: { model: 'block', elements: [plane([0.05, 0.02, 0.03], [0.35, 1, 0.25])], focus: 'distances', camera: [2.3, 1.6, 2.6] },
+    scene: { model: 'bracket', elements: [plane([-0.3, -0.37, 0.03], [0.35, 1, 0.25])], focus: 'distances', camera: [2.4, 1.9, 3.4] },
   },
   {
     title: 'Order the points and split into triangles',
@@ -146,7 +146,7 @@ a, b = two directions in the plane
 θ = atan2( b · (v − c), a · (v − c) )
 sort by θ, then triangles (0, 2, 1), (0, 3, 2), …`,
     legend: '<i class="sw" style="background:#0b6e77"></i> sorted polygon &nbsp; coloured: fan triangles',
-    scene: { model: 'block', elements: [plane([0.05, 0.02, 0.03], [0.35, 1, 0.25])], focus: 'polygon', camera: [2.3, 1.6, 2.6] },
+    scene: { model: 'bracket', elements: [plane([-0.3, -0.37, 0.03], [0.35, 1, 0.25])], focus: 'polygon', camera: [2.4, 1.9, 3.4] },
   },
   {
     title: 'All the small pieces make the cap',
@@ -156,7 +156,7 @@ sort by θ, then triangles (0, 2, 1), (0, 3, 2), …`,
 so their pieces meet exactly: the cap has no gaps, even on a concave part with a hole like this bracket.</p>`,
     legend: 'one colour per tetrahedron &nbsp; <i class="sw" style="background:#1c242a"></i> tetrahedron being added',
     scene: {
-      model: 'bracket', elements: [plane([0, 0, 0.05], [0.15, 0.1, 1])], surface: 'clipped', cap: 'tet', capWire: true, camera: [0.6, 0.9, 3.2],
+      model: 'bracket', elements: [plane([0, 0, 0.05], [-0.15, -0.1, -1])], surface: 'clipped', cap: 'tet', capWire: true, camera: [0.6, 0.9, 3.2],
       anim: (t, s) => s.setBuild(Math.min(1, (t % 8) / 6)),
     },
   },
@@ -171,7 +171,7 @@ applied to the new values.</p>`,
 with w₀ + w₁ + w₂ + w₃ = 1
 exact: the result is linear in a tetrahedron`,
     scene: {
-      model: 'block', elements: [plane([0, 0.15, 0], [-0.3, -1, -0.2]), sphere([0.35, 0.05, 0.3], 0.7)], surface: 'clipped', cap: 'field', camera: [2.4, 2.1, 2.6],
+      model: 'bracket', elements: [plane([-0.3, -0.4, 0], [-0.2, -1, -0.15]), sphere([0.3, -0.75, 0.3], 0.5)], surface: 'clipped', cap: 'field', camera: [2.3, 2.7, 3.0],
       anim: (t, s) => s.setPhase(t * 0.9),
     },
   },
@@ -184,7 +184,7 @@ and add the crossing point on each side of the polygon that changes side.</p>
 <p>A tetrahedron fully behind another plane is skipped before any polygon is made.</p>`,
     math: 'for each other plane:  keep corners with d ≥ 0,  add the point at t = d₁ / (d₁ − d₂) on each changing side',
     legend: 'one colour per plane cap',
-    scene: { model: 'block', elements: [plane([0.05, 0.05, 0], [0.1, 1, 0.05]), plane([-0.1, 0, 0], [1, 0.1, -0.15])], surface: 'clipped', cap: 'section', capWire: true, normals: true, camera: [2.4, 2.2, 2.6] },
+    scene: { model: 'bracket', elements: [plane([0, 0, 0.1], [0.05, 0.1, -1]), plane([0.4, 0, 0], [-1, 0.1, 0.15])], surface: 'clipped', cap: 'section', capWire: true, normals: true, camera: [2.4, 1.9, 3.4] },
   },
   {
     title: 'A box is six planes',
@@ -193,7 +193,7 @@ and add the crossing point on each side of the polygon that changes side.</p>
 inside the other five faces. It is the plane method of steps 7 to 12, six times.</p>`,
     math: 'face i: plane of face i,  trimmed by the inside of the 5 other faces',
     legend: 'one colour per face cap &nbsp; arrows: outward face normals',
-    scene: { model: 'block', elements: [box([0.45, 0.35, 0.35], [1, 1, 1], [0.15, 0.4, 0])], surface: 'clipped', cap: 'section', capWire: true, normals: true, camera: [2.6, 2.1, 2.6] },
+    scene: { model: 'bracket', elements: [box([-0.4, -0.25, 0.25], [0.8, 0.8, 0.8], [0.15, 0.4, 0])], surface: 'clipped', cap: 'section', capWire: true, normals: true, camera: [2.4, 1.9, 3.4] },
   },
   {
     title: 'A sphere: a fine ball cut by each tetrahedron',
@@ -205,7 +205,7 @@ keeps the pieces of those triangles that lie inside the tetrahedron (cut by its 
     math: `weights of a point x:  (w₁, w₂, w₃) = A⁻¹ · (x − p₀),   w₀ = 1 − w₁ − w₂ − w₃
 A = [ p₁ − p₀,  p₂ − p₀,  p₃ − p₀ ]`,
     legend: 'one colour per tetrahedron',
-    scene: { model: 'block', elements: [sphere([0.55, 0.3, 0.3], 1.1)], surface: 'clipped', cap: 'tet', camera: [2.6, 2.0, 2.4] },
+    scene: { model: 'bracket', elements: [sphere([-0.5, -0.4, 0.3], 0.9)], surface: 'clipped', cap: 'tet', camera: [2.4, 1.9, 3.4] },
   },
   {
     title: 'Caps and the other volumes',
@@ -217,7 +217,7 @@ volume, a cap would erase itself.</p>
 <li>Two identical volumes share one owner, so their caps do not erase each other.</li></ul>`,
     trick: 'One extra vertex attribute (<code>owner</code>) on the cap, and one <code>continue</code> in the shader loop of step 5.',
     legend: '<i class="sw" style="background:#fe5b04"></i> cap owned by the box &nbsp; <i class="sw" style="background:#3b82f6"></i> cap owned by the sphere',
-    scene: { model: 'block', elements: [box([0.35, 0.3, 0.3], [0.9, 0.9, 0.9]), sphere([-0.25, 0.35, 0.35], 1.0)], surface: 'clipped', cap: 'owner', camera: [2.5, 2.2, 2.5] },
+    scene: { model: 'bracket', elements: [box([-0.4, -0.3, 0.3], [0.7, 0.7, 0.7]), sphere([-0.75, 0.2, 0.3], 0.8)], surface: 'clipped', cap: 'owner', camera: [2.4, 1.9, 3.4] },
   },
   {
     title: 'Draw the red outline',
@@ -230,7 +230,7 @@ volume, a cap would erase itself.</p>
     math: `circle center = c − (n · (c − a)) n
 circle radius = √(r² − d²)     d = n · (c − a)`,
     legend: '<i class="sw" style="background:#dc2626"></i> outline',
-    scene: { model: 'ball', elements: [plane([0, -0.2, 0], [0.1, 1, 0.3]), box([0.5, 0.2, 0.4], [0.8, 0.8, 0.8]), sphere([-0.5, 0.2, 0.35], 0.8)], surface: 'clipped', cap: 'field', outline: true, camera: [2.2, 2.0, 2.6] },
+    scene: { model: 'bracket', elements: [plane([0, -0.8, 0], [0.1, 1, 0.3]), box([0.6, -0.5, 0.4], [0.6, 0.6, 0.6]), sphere([-0.8, 0.4, 0.35], 0.7)], surface: 'clipped', cap: 'field', outline: true, camera: [2.4, 1.9, 3.4] },
   },
   {
     title: 'Everything together',
@@ -240,6 +240,6 @@ circle radius = √(r² − d²)     d = n · (c − a)`,
 <li><b>Main thread</b>: draw the outline (step 16).</li></ol>
 <p>During a drag, the cap can be one build late. The hole then uses the shapes of the <b>last finished cap</b>,
 so hole and cap always match. A click in the 3D view repeats the removal test on the CPU, so it never picks a hidden triangle.</p>`,
-    scene: { model: 'bracket', elements: [plane([0, 0, 0.05], [0.2, 0.1, 1]), sphere([-0.75, 0.5, 0.4], 0.4)], surface: 'clipped', cap: 'field', outline: true, autoRotate: true, camera: [1.7, 1.5, 3.6] },
+    scene: { model: 'bracket', elements: [plane([0, 0, 0.05], [-0.2, -0.1, -1]), sphere([-0.75, 0.45, -0.1], 0.75)], surface: 'clipped', cap: 'field', outline: true, autoRotate: true, camera: [1.7, 1.5, 3.6] },
   },
 ]
